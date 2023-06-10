@@ -17,7 +17,7 @@ class SendEmailToUserAboutPost implements ShouldQueue
      */
 
     use InteractsWithQueue;
-    public $tries = 5;
+    public $tries = 2;
 
     public function __construct()
     {
@@ -30,18 +30,12 @@ class SendEmailToUserAboutPost implements ShouldQueue
     public function handle(PostCreated $event): void
     {
 
-        try{
             $mail_data = collect([]);
-            $mail_data->put('title', $event->post->title);
-            $mail_data->put('description', $event->post->description);
-            $mail_data->put('email', $event->post->email);
+            $mail_data->put('title', $event->post['title']);
+            $mail_data->put('description', $event->post['description']);
             
             $email = new UserPostsEmail($mail_data);
-            Mail::to($event->post->email)->send($email);
-
-           }catch(\Exception $e){
-            
-        }
+            Mail::to($event->post['email'])->send($email);
         
     }
 }
