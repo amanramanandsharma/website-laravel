@@ -8,7 +8,7 @@ use Illuminate\Queue\InteractsWithQueue;
 
 use App\Mails\UserPostsEmail;
 use Mail;
-
+use DB;
 
 class SendEmailToUserAboutPost implements ShouldQueue
 {
@@ -29,6 +29,7 @@ class SendEmailToUserAboutPost implements ShouldQueue
      */
     public function handle(PostCreated $event): void
     {
+        try{
 
             $mail_data = collect([]);
             $mail_data->put('title', $event->post['title']);
@@ -36,6 +37,20 @@ class SendEmailToUserAboutPost implements ShouldQueue
             
             $email = new UserPostsEmail($mail_data);
             Mail::to($event->post['email'])->send($email);
+
+            DB::table('posts_users')->insert([
+                'user_id'=> $request->description,
+                'post_id' =>  $request->title,
+                'success'=> 1,
+            ]);
+
+        }catch(\Exception $e){
+             DB::table('posts_users')->insert([
+                'user_id'=> $request->description,
+                'post_id' =>  $request->title,
+                'success'=> 0,
+            ]);
+        }
         
     }
 }
